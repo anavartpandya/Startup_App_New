@@ -3,11 +3,12 @@ from flask import Flask, request, jsonify
 from transformers import BertTokenizer, BertForSequenceClassification
 import torch
 
+app = Flask(__name__)
 # Load tokenizer
 tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
 
 # Load model
-model_path = 'FlashcardBackend/fine_tuned_bert_sst2_2.pth'  # Adjust the path to your model file
+# model_path = 'FlashcardBackend/fine_tuned_bert_sst2_2.pth'  # Adjust the path to your model file
 model = BertForSequenceClassification.from_pretrained('bert-base-uncased', num_labels=2)
 
 # Load the fine-tuned model weights
@@ -40,13 +41,13 @@ def predict_sentiment(input_text):
 # input_string = "Though he is not a good writer, he is a brilliant cricketer"
 # predicted_class = predict_sentiment(input_string)
 
-app = Flask(__name__)
 
 @app.route('/modify_flashcard', methods=['POST'])
 def modify_flashcard():
     data = request.json
     front_text = data['frontText']
-    front_text_pred = predict_sentiment(data['frontText'])
+    front_text_pred = 'postive' if predict_sentiment(data['frontText']) == 1 else 'negative'
+    print(front_text_pred)
     back_text = data['backText'] + " got its"
     back_text_pred = predict_sentiment(data['frontText'])
     return jsonify({'frontText': front_text, 'backText': front_text_pred})
